@@ -1,0 +1,39 @@
+# Задание 1. 
+# 1. Спроектировать структуру таблиц(ы) для хранения Контактов, которые могут иметь
+# друзей из этого же списка Контактов (в рамках задачи достаточно хранить только 
+# Имя Контакта). Если Контакт 2 является другом Контакта 1, это не означает, что 
+#Контакт 1 является другом Контакта 2.
+
+create database Task;
+use Task;
+create table Contact (id int not null auto_increment primary key, name varchar(128));
+insert into Contact (name) values ('user1'), ('user2'), ('user3'), ('user4'), ('user5'), ('user6'), ('user7'); 
+create table Friend (id int not null auto_increment primary key, idContact int, idContactFriend int);
+insert into Friend (idContact, idContactFriend) values (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (2,1), (2,3), (3,6), (3,7), (7,6), (7,5), (7,4), (7,3), (7,2), (7,1);
+
+#1.1. Написать запрос sql, отображающий список Контактов, имеющих больше 5 друзей.
+
+select name from Contact where id in (select idContact from Friend group by idContact having count(idContactFriend)>5);
+
+#1.2. Написать запрос sql, отображающий все пары Контактов, которые дружат друг с 
+# другом. Исключить дубликаты. (задача на sql запросы, использование PHP запрещено).
+
+select 
+    Contact1.name name1, 
+    Contact2.name name2 
+from 
+    Friend Friend1
+inner join
+    Friend Friend2 
+    on 
+        Friend1.idContact=Friend2.idContactFriend and 
+        Friend1.idContactFriend=Friend2.idContact and 
+        Friend1.id<Friend2.id 
+inner join 
+    Contact Contact1 
+    on 
+        Contact1.id=Friend1.idContact
+inner join 
+    Contact Contact2 
+    on 
+        Contact2.id=Friend1.idContactFriend;
